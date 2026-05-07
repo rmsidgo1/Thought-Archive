@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import { url } from '../utils/url';
+
+interface Props {
+  backlinks: string[];
+}
+
+const { backlinks } = Astro.props;
+
+const allNotes = await getCollection('notes');
+const backlinkNotes = allNotes.filter(n => backlinks.includes(n.slug));
+---
+
+{
+  backlinkNotes.length > 0 && (
+    <section class="mt-12 border-t border-gray-200 dark:border-gray-800 pt-8">
+      <h2 class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        이 노트를 링크한 글 ({backlinkNotes.length})
+      </h2>
+      <ul class="space-y-1.5">
+        {backlinkNotes.map(note => (
+          <li>
+            <a
+              href={url(`/notes/${note.slug}`)}
+              class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+            >
+              {note.data.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

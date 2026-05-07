@@ -1,0 +1,19 @@
+---
+import { url } from '../utils/url';
+
+interface Props {
+  tag: string;
+  count?: number;
+}
+
+const { tag, count } = Astro.props;
+---
+
+<a
+  href={url(`/tags/${tag}`)}
+  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+         bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300
+         hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+>
+  #{tag}{count != null ? ` (${count})` : ''}
+</a>
