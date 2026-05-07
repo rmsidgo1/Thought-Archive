@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NoteCard from '../components/NoteCard.astro';
+import TagBadge from '../components/TagBadge.astro';
+import { getCollection } from 'astro:content';
+import { getAllTags } from '../utils/tags';
+import { getReadingTime } from '../utils/reading-time';
+import { url } from '../utils/url';
+
+const notes = await getCollection('notes');
+const tagMap = await getAllTags();
+
+const sorted = [...notes].sort((a, b) => {
+  const da = a.data.created ?? '0000-00-00';
+  const db = b.data.created ?? '0000-00-00';
+  return db.localeCompare(da);
+});
+
+const allSlugs = notes.map(n => n.slug);
+---
+
+<BaseLayout
+  title="Thought Archive"
+  description="생각을 기록하고 연결하는 나의 지식 아카이브"
+>
+  <!-- Hero -->
+  <section class="mb-10">
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+      Thought Archive
+    </h1>
+    <p class="text-gray-500 dark:text-gray-400 text-sm">
+      생각을 기록하고, 연결하고, 탐색하세요.
+    </p>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <a
+        href={url('/search')}
+        class="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors"
+      >
+        검색
+      </a>
+      <button
+        id="random-btn"
+        data-slugs={JSON.stringify(allSlugs)}
+        data-base={url('/notes/')}
+        class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 dark:border-gray-700 px-3.5 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      >
+        랜덤 생각
+      </button>
+    </div>
+  </section>
+
+  <!-- Tags -->
+  {
+    tagMap.size > 0 && (
+      <section class="mb-10">
+        <h2 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          태그
+        </h2>
+        <div class="flex flex-wrap gap-2">
+          {[...tagMap.entries()].map(([tag, count]) => (
+            <TagBadge tag={tag} count={count} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Notes -->
+  <section>
+    <h2 class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+      노트 ({notes.length}개)
+    </h2>
+    <div class="space-y-2.5">
+      {
+        sorted.map(note => (
+          <NoteCard
+            slug={note.slug}
+            title={note.data.title}
+            tags={note.data.tags}
+            created={note.data.created}
+            readingTime={getReadingTime(note.body)}
+          />
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const btn = document.getElementById('random-btn');
+  if (btn) {
+    const slugs: string[] = JSON.parse(btn.dataset.slugs ?? '[]');
+    const base = btn.dataset.base ?? '/notes/';
+    btn.addEventListener('click', () => {
+      if (!slugs.length) return;
+      const slug = slugs[Math.floor(Math.random() * slugs.length)];
+      window.location.href = `${base}${slug}`;
+    });
+  }
+</script>

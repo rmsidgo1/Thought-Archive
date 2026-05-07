@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TagBadge from '../../components/TagBadge.astro';
+import BacklinkList from '../../components/BacklinkList.astro';
+import RelatedNotes from '../../components/RelatedNotes.astro';
+import { getCollection } from 'astro:content';
+import { getBacklinks, parseLinks } from '../../utils/backlinks';
+import { getReadingTime } from '../../utils/reading-time';
+import { url } from '../../utils/url';
+
+export async function getStaticPaths() {
+  const notes = await getCollection('notes');
+  return notes.map(note => ({
+    params: { slug: note.slug },
+    props: { note },
+  }));
+}
+
+const { note } = Astro.props;
+const { Content } = await note.render();
+
+const backlinks = await getBacklinks(note.slug);
+const links = parseLinks(note.body);
+const readingTime = getReadingTime(note.body);
+---
+
+<BaseLayout title={note.data.title} description={`${note.data.title} — Thought Archive`}>
+  <article data-pagefind-body>
+    <!-- 헤더 -->
+    <header class="mb-8">
+      {
+        note.data.tags.length > 0 && (
+          <div class="mb-3 flex flex-wrap gap-1.5">
+            {note.data.tags.map(tag => <TagBadge tag={tag} />)}
+          </div>
+        )
+      }
+      <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        {note.data.title}
+      </h1>
+      <div class="flex flex-wrap items-center gap-3 text-sm text-gray-400 dark:text-gray-500">
+        {note.data.created && <time datetime={note.data.created}>{note.data.created}</time>}
+        {
+          note.data.updated && note.data.updated !== note.data.created && (
+            <span>수정: {note.data.updated}</span>
+          )
+        }
+        <span>{readingTime}분 읽기</span>
+      </div>
+    </header>
+
+    <!-- 본문 -->
+    <div class="prose prose-gray dark:prose-invert max-w-none prose-a:no-underline">
+      <Content />
+    </div>
+  </article>
+
+  <!-- 관련 노트 -->
+  <RelatedNotes
+    currentSlug={note.slug}
+    tags={note.data.tags}
+    backlinks={backlinks}
+    links={links}
+  />
+
+  <!-- 역링크 -->
+  <BacklinkList backlinks={backlinks} />
+
+  <!-- 뒤로 가기 -->
+  <nav class="mt-12 border-t border-gray-200 dark:border-gray-800 pt-6">
+    <a href={url('/')} class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+      ← 홈으로
+    </a>
+  </nav>
+</BaseLayout>
