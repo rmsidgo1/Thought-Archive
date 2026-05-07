@@ -1,50 +1,68 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { url } from '../utils/url';
 
-const baseUrl = import.meta.env.BASE_URL;
+// url() 유틸리티로 base path 슬래시 문제 방지
+const pagefindCss = url('/pagefind/pagefind-ui.css');
+const pagefindJs  = url('/pagefind/pagefind-ui.js');
 ---
 
 <BaseLayout title="검색" description="노트 전문 검색">
   <h1 class="mb-6 text-2xl font-semibold text-gray-900 dark:text-gray-100">검색</h1>
 
+  <link rel="stylesheet" href={pagefindCss} />
   <div id="search"></div>
 
-  <!-- Pagefind UI — 빌드 후 생성된 파일을 동적으로 로드 -->
-  <link href={`${baseUrl}pagefind/pagefind-ui.css`} rel="stylesheet" />
-  <script define:vars={{ baseUrl }}>
-    window.addEventListener('DOMContentLoaded', async () => {
+  <script define:vars={{ pagefindJs }}>
+    async function initSearch() {
+      var el = document.getElementById('search');
+      if (!el) return;
       try {
-        // @ts-ignore — pagefind은 빌드 후에만 존재
-        const { PagefindUI } = await import(`${baseUrl}pagefind/pagefind-ui.js`);
-        new PagefindUI({
+        var mod = await import(pagefindJs);
+        new mod.PagefindUI({
           element: '#search',
           showSubResults: true,
           showImages: false,
-          resetStyles: false,
           translations: {
             placeholder: '검색어를 입력하세요...',
             zero_results: '[SEARCH_TERM]에 대한 결과가 없습니다.',
           },
         });
-      } catch {
-        document.getElementById('search')!.innerHTML =
-          '<p class="text-sm text-gray-500 dark:text-gray-400 mt-4">개발 모드에서는 검색을 사용할 수 없습니다.<br><code class="bg-gray-100 dark:bg-gray-800 px-1 rounded">npm run build && npm run preview</code>로 확인하세요.</p>';
+      } catch (e) {
+        el.innerHTML =
+          '<p style="color:#6b7280;font-size:0.875rem;margin-top:1rem">개발 모드에서는 검색을 사용할 수 없습니다. <code>npm run build &amp;&amp; npm run preview</code>로 확인하세요.</p>';
       }
-    });
+    }
+
+    // DOMContentLoaded 이미 발생한 경우 즉시 실행
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSearch);
+    } else {
+      initSearch();
+    }
   </script>
 </BaseLayout>
 
 <style is:global>
   .pagefind-ui__search-input {
-    @apply w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500;
+    @apply w-full rounded-lg border border-gray-300 dark:border-gray-700
+           bg-white dark:bg-gray-800 px-4 py-2 text-sm
+           text-gray-900 dark:text-gray-100
+           focus:outline-none focus:ring-2 focus:ring-indigo-500;
   }
   .pagefind-ui__result {
-    @apply mt-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 p-4;
+    @apply mt-4 rounded-lg border border-gray-200 dark:border-gray-800
+           bg-white dark:bg-gray-800/50 p-4;
   }
-  .pagefind-ui__result-title {
-    @apply text-sm font-medium text-indigo-600 dark:text-indigo-400;
+  .pagefind-ui__result-title a {
+    @apply text-sm font-medium text-indigo-600 dark:text-indigo-400 no-underline hover:underline;
   }
   .pagefind-ui__result-excerpt {
     @apply mt-1 text-xs text-gray-500 dark:text-gray-400;
+  }
+  .pagefind-ui__button {
+    @apply mt-6 rounded-md border border-gray-300 dark:border-gray-700
+           px-4 py-2 text-sm text-gray-700 dark:text-gray-300
+           hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors;
   }
 </style>
