@@ -69,6 +69,45 @@ const typeConfig = [
     </div>
   </section>
 
+  <!-- 노트 추가 안내 -->
+  <section class="mb-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40 px-5 py-4">
+    <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">
+      노트 추가하기
+    </h2>
+    <ol class="space-y-2 text-sm text-gray-600 dark:text-gray-400 list-decimal list-inside">
+      <li>
+        <a
+          href="https://github.com/rmsidgo1/Thought-Archive/blob/main/NOTE_INDEX.md"
+          target="_blank" rel="noopener"
+          class="text-indigo-600 dark:text-indigo-400 hover:underline"
+        >NOTE_INDEX.md</a>에서 기존 노트 목록과 태그 확인
+      </li>
+      <li>
+        <a
+          href="https://github.com/rmsidgo1/Thought-Archive/blob/main/README.md"
+          target="_blank" rel="noopener"
+          class="text-indigo-600 dark:text-indigo-400 hover:underline"
+        >README.md</a>의 LLM 시스템 프롬프트를 LLM에 전달해 노트 작성
+      </li>
+      <li>
+        <a
+          href="https://github.com/rmsidgo1/Thought-Archive/new/main/src/content/notes"
+          target="_blank" rel="noopener"
+          class="text-indigo-600 dark:text-indigo-400 hover:underline"
+        >새 파일 만들기</a>에서 노트 붙여넣고 커밋
+      </li>
+      <li>
+        역방향 연결 필요 시
+        <a
+          href="https://github.com/rmsidgo1/Thought-Archive/new/main?filename=LINK_REQUESTS.json"
+          target="_blank" rel="noopener"
+          class="text-indigo-600 dark:text-indigo-400 hover:underline"
+        >LINK_REQUESTS.json 추가</a>
+        → GitHub Actions가 자동 처리
+      </li>
+    </ol>
+  </section>
+
   <!-- Type Filter (타입이 있는 노트가 하나 이상일 때만 표시) -->
   {hasTypedNotes && (
     <section class="mb-8">
