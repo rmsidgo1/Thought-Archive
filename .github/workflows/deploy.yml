@@ -41,10 +41,10 @@ jobs:
             echo "LINK_REQUESTS.json 발견 — 처리 중..."
             if node scripts/apply-link-requests.mjs; then
               git add src/content/notes/
-              git rm --ignore-unmatch LINK_REQUESTS.json
+              git add -u LINK_REQUESTS.json   # 삭제된 tracked 파일 staging
               if ! git diff --cached --quiet; then
                 git commit -m "chore: apply backlink requests [skip ci]"
-                git push
+                git push origin HEAD:main
               fi
             else
               echo "⚠️  처리 실패 — LINK_REQUESTS.json을 보존합니다."
@@ -57,7 +57,7 @@ jobs:
           git add NOTE_INDEX.md
           if ! git diff --cached --quiet; then
             git commit -m "chore: update NOTE_INDEX.md [skip ci]"
-            git push
+            git push origin HEAD:main
           fi
 
       - name: Setup Pages
