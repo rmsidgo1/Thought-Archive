@@ -22,6 +22,19 @@
     @apply text-indigo-600 dark:text-indigo-400 no-underline border-b border-indigo-300 dark:border-indigo-700;
   }
 
+  /* 깨진 wiki-link (대상 노트가 존재하지 않음) */
+  .wiki-link--broken {
+    @apply text-gray-400 dark:text-gray-600 no-underline line-through
+           decoration-red-400 dark:decoration-red-600 cursor-help
+           border-b-0 pointer-events-none;
+  }
+
+  .prose .wiki-link--broken {
+    @apply text-gray-400 dark:text-gray-600 no-underline line-through
+           decoration-red-400 dark:decoration-red-600 cursor-help
+           border-b-0 pointer-events-none;
+  }
+
   /* ── Shiki 듀얼 테마 (라이트/다크 모드별 코드 블록) ── */
   :root:not(.dark) .astro-code,
   :root:not(.dark) .astro-code span {

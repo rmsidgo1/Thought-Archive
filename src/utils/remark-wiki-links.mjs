@@ -2,10 +2,11 @@ import { visit } from 'unist-util-visit';
 
 /**
  * Remark plugin to transform [[slug]] wiki-links into markdown links.
- * Only processes text nodes outside code blocks.
+ * Marks links to non-existent slugs with class 'wiki-link--broken'.
  */
 export function remarkWikiLinks(options = {}) {
   const base = options.base ?? '';
+  const existingSlugs = options.existingSlugs ?? null; // Set<string> | null
 
   return function (tree) {
     visit(tree, 'text', function (node, index, parent) {
@@ -33,12 +34,19 @@ export function remarkWikiLinks(options = {}) {
         }
 
         const slug = match[1].trim();
+        const broken = existingSlugs !== null && !existingSlugs.has(slug);
+
         nodes.push({
           type: 'link',
           url: `${base}/notes/${slug}`,
-          title: null,
+          title: broken ? `'${slug}' 노트를 찾을 수 없습니다` : null,
           children: [{ type: 'text', value: slug }],
-          data: { hProperties: { class: 'wiki-link' } },
+          data: {
+            hProperties: {
+              class: broken ? 'wiki-link wiki-link--broken' : 'wiki-link',
+              ...(broken && { 'aria-label': `존재하지 않는 노트: ${slug}` }),
+            },
+          },
         });
 
         lastIndex = match.index + match[0].length;

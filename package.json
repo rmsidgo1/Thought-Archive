@@ -6,6 +6,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "note-index": "node scripts/generate-note-index.mjs",
+    "check-links": "node scripts/check-links.mjs",
     "build": "node scripts/generate-note-index.mjs && astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro"
