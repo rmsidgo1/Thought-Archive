@@ -48,4 +48,6 @@ README.md의 규칙을 시스템 프롬프트로 제공하면 된다.
 > [!tip]
 > Few-shot 예시는 3개 이하로 유지하라. 너무 많으면 모델이 예시에 과적합되어 창의적 응답이 줄어든다.
 
-[[llm-knowledge-automation]]
+## 자동 연결
+
+[[llm-knowledge-automation]] — *llm-knowledge-automation 노트 작성 중에 추가된 연결입니다.*

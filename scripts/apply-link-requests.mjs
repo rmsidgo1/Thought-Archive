@@ -89,9 +89,12 @@ for (const entry of links) {
     continue;
   }
 
-  // 파일 끝에 연결 추가
-  const line = `\n\n[[${source_slug}]]`;
-  await writeFile(targetPath, content.trimEnd() + line + '\n', 'utf-8');
+  // 파일 끝에 연결 추가 (## 자동 연결 섹션 아래)
+  const attribution = `[[${source_slug}]] — *${source_slug} 노트 작성 중에 추가된 연결입니다.*`;
+  const newContent = content.includes('## 자동 연결')
+    ? content.trimEnd() + `\n${attribution}` + '\n'
+    : content.trimEnd() + `\n\n## 자동 연결\n\n${attribution}` + '\n';
+  await writeFile(targetPath, newContent, 'utf-8');
   console.log(`✅ 연결 추가: ${target_slug} ← [[${source_slug}]]`);
   applied++;
 }
