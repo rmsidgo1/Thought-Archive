@@ -32,4 +32,4 @@ updated: 2026-05-07
 
 [[second-brain]]도 비슷한 맥락의 방법론이다.
 
-[[llm-knowledge-automation]] — *llm-knowledge-automation 노트 작성 중에 추가된 연결입니다.*
+[[llm-knowledge-automation]]

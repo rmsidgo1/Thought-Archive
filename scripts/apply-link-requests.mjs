@@ -90,7 +90,7 @@ for (const entry of links) {
   }
 
   // 파일 끝에 연결 추가
-  const line = `\n\n[[${source_slug}]] — *${source_slug} 노트 작성 중에 추가된 연결입니다.*`;
+  const line = `\n\n[[${source_slug}]]`;
   await writeFile(targetPath, content.trimEnd() + line + '\n', 'utf-8');
   console.log(`✅ 연결 추가: ${target_slug} ← [[${source_slug}]]`);
   applied++;
