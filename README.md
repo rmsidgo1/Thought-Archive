@@ -33,8 +33,11 @@ Astro + TailwindCSS + Pagefind 기반. GitHub Pages 배포.
 
 위 내용을 바탕으로 노트를 작성해줘.
 README.md의 시스템 프롬프트 규칙을 따르고,
-NOTE_INDEX.md의 기존 노트 목록을 참고해서 관련된 노트를 반드시 [[slug]]로 연결해줘.
-연결할 노트가 없으면 연결하지 않아도 돼.
+NOTE_INDEX.md의 기존 노트 목록을 참고해서 다음 두 가지를 처리해줘:
+
+1. 새 노트 본문에서 관련 기존 노트를 [[slug]]로 연결해줘.
+2. 기존 노트에도 새 노트로의 역방향 연결이 필요하면 LINK_REQUESTS.json도 함께 작성해줘.
+   (GitHub Actions가 자동으로 기존 노트에 연결을 추가해줘.)
 ```
 
 > **팁**: `npm run build`를 실행하면 `note-index` 단계가 자동으로 포함됩니다.
@@ -181,16 +184,52 @@ updated: [오늘 날짜 YYYY-MM-DD]
 5. **제목**: 검색 시 유용하도록 구체적으로 (❌ "버그 수정" → ✅ "React useEffect 무한루프 해결")
 6. **한 노트 = 하나의 주제**: 여러 주제가 있으면 노트를 분리하고 Wiki-link로 연결
 
+## 역방향 연결 요청 (LINK_REQUESTS.json)
+
+새 노트 본문에서 기존 노트를 [[slug]]로 연결하는 것 외에,
+기존 노트가 새 노트를 가리키는 역방향 연결이 필요하다면
+LINK_REQUESTS.json을 함께 출력합니다.
+GitHub Actions가 이 파일을 읽고 자동으로 기존 노트에 연결을 추가한 뒤 파일을 삭제합니다.
+
+형식 (반드시 아래 JSON 구조를 정확히 따를 것):
+
+{
+  "source_slug": "이번에_작성한_노트의_slug",
+  "links": [
+    { "target_slug": "역방향_연결을_추가할_기존_노트_slug" },
+    { "target_slug": "또_다른_기존_노트_slug" }
+  ]
+}
+
+규칙:
+- source_slug: 방금 작성한 노트의 slug
+- target_slug: NOTE_INDEX.md에 존재하는 slug만 사용할 것
+- 연관성이 낮으면 LINK_REQUESTS.json을 생성하지 않아도 됩니다
+
 ## 출력 형식
 
-파일 경로와 전체 내용을 다음 형식으로 출력합니다:
+항상 노트 파일을 출력합니다. 역방향 연결이 필요하면 LINK_REQUESTS.json도 함께 출력합니다.
 
-**파일**: src/content/notes/{slug}.md
+**파일 1**: src/content/notes/{slug}.md
 
 ```markdown
 [전체 노트 내용]
 ```
 
+역방향 연결이 필요한 경우 추가로:
+
+**파일 2**: LINK_REQUESTS.json
+
+```json
+{
+  "source_slug": "{slug}",
+  "links": [
+    { "target_slug": "기존_노트_slug" }
+  ]
+}
+```
+
+역방향 연결이 필요 없으면 LINK_REQUESTS.json은 출력하지 않습니다.
 대화에서 여러 주제가 나왔다면 노트를 분리해서 각각 출력합니다.
 ````
 

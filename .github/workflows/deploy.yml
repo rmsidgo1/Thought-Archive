@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write  # NOTE_INDEX.md commit-back 용
+  contents: write  # NOTE_INDEX.md / backlink commit-back 용
   pages: write
   id-token: write
 
@@ -30,11 +30,30 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Apply link requests (LINK_REQUESTS.json)
+        run: |
+          if [ -f LINK_REQUESTS.json ]; then
+            echo "LINK_REQUESTS.json 발견 — 처리 중..."
+            if node scripts/apply-link-requests.mjs; then
+              git add src/content/notes/
+              git rm --ignore-unmatch LINK_REQUESTS.json
+              if ! git diff --cached --quiet; then
+                git commit -m "chore: apply backlink requests [skip ci]"
+                git push
+              fi
+            else
+              echo "⚠️  처리 실패 — LINK_REQUESTS.json을 보존합니다."
+            fi
+          fi
+
       - name: Update NOTE_INDEX.md
         run: |
           node scripts/generate-note-index.mjs
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add NOTE_INDEX.md
           if ! git diff --cached --quiet; then
             git commit -m "chore: update NOTE_INDEX.md [skip ci]"
