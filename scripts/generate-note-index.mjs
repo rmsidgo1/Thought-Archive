@@ -55,6 +55,19 @@ const notes = await Promise.all(
 
 notes.sort((a, b) => a.slug.localeCompare(b.slug));
 
+// 태그 사용 빈도 집계
+const tagCounts = new Map();
+for (const note of notes) {
+  for (const tag of note.tags) {
+    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+  }
+}
+
+const tagList = [...tagCounts.entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .map(([tag, count]) => `${tag}(${count})`)
+  .join(' · ');
+
 const date = new Date().toISOString().slice(0, 10);
 
 const rows = notes.map(n =>
@@ -72,6 +85,13 @@ const output = `\
 >
 > **LLM 노트 작성 요청 시 이 파일을 README.md와 함께 전달하세요.**
 > 기존 노트와 관련된 내용은 \`[[slug]]\` 문법으로 반드시 연결해야 합니다.
+> 태그는 아래 목록에서 우선 재사용하세요.
+
+## 기존 태그 (우선 재사용)
+
+> 새 태그를 만들기 전에 아래 태그를 먼저 확인하세요. 의미가 겹치면 기존 태그를 사용합니다.
+
+${tagList || '(태그 없음)'}
 
 ## 노트 목록
 
@@ -100,4 +120,4 @@ NOTE_INDEX.md의 기존 노트 목록을 참고해서 관련된 노트를 반드
 `;
 
 await writeFile(OUTPUT, output, 'utf-8');
-console.log(`✅ NOTE_INDEX.md 생성 완료 (${notes.length}개 노트 → ${OUTPUT})`);
+console.log(`✅ NOTE_INDEX.md 생성 완료 (${notes.length}개 노트, ${tagCounts.size}개 태그 → ${OUTPUT})`);
