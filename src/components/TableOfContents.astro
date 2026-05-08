@@ -1,0 +1,68 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+// h2, h3만 포함하고 최소 2개 이상일 때 렌더
+const items = headings.filter(h => h.depth === 2 || h.depth === 3);
+---
+
+{items.length >= 2 && (
+  <nav id="toc" aria-label="목차">
+    <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+      목차
+    </p>
+    <ol class="space-y-1.5">
+      {items.map(h => (
+        <li style={`padding-left: ${(h.depth - 2) * 12}px`}>
+          <a
+            href={`#${h.slug}`}
+            data-toc-slug={h.slug}
+            class="toc-link block truncate text-sm text-gray-500 dark:text-gray-400
+                   hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+          >
+            {h.text}
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<script>
+  // 스크롤 위치에 따라 현재 헤딩 하이라이트 (scrollspy)
+  const tocLinks = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
+  if (tocLinks.length > 0) {
+    const slugs = [...tocLinks].map(a => a.dataset.tocSlug ?? '');
+    const headingEls = slugs
+      .map(s => document.getElementById(s))
+      .filter(Boolean) as HTMLElement[];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            tocLinks.forEach(a => {
+              const active = a.dataset.tocSlug === entry.target.id;
+              a.classList.toggle('text-indigo-600', active);
+              a.classList.toggle('dark:text-indigo-400', active);
+              a.classList.toggle('font-medium', active);
+              a.classList.toggle('text-gray-500', !active);
+              a.classList.toggle('dark:text-gray-400', !active);
+            });
+          }
+        });
+      },
+      { rootMargin: '-64px 0px -70% 0px', threshold: 0 }
+    );
+
+    headingEls.forEach(el => observer.observe(el));
+  }
+</script>

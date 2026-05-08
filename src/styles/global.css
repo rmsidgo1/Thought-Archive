@@ -22,8 +22,98 @@
     @apply text-indigo-600 dark:text-indigo-400 no-underline border-b border-indigo-300 dark:border-indigo-700;
   }
 
+  /* ── Shiki 듀얼 테마 (라이트/다크 모드별 코드 블록) ── */
+  :root:not(.dark) .astro-code,
+  :root:not(.dark) .astro-code span {
+    color: var(--shiki-light) !important;
+    background-color: var(--shiki-light-bg) !important;
+    font-style: var(--shiki-light-font-style) !important;
+    font-weight: var(--shiki-light-font-weight) !important;
+    text-decoration: var(--shiki-light-text-decoration) !important;
+  }
+
+  .dark .astro-code,
+  .dark .astro-code span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+
   /* focus-visible 공통 스타일 */
   :focus-visible {
     @apply outline-2 outline-indigo-500 outline-offset-2;
+  }
+
+  /* ── Callout blocks ─────────────────────────────────── */
+  .callout {
+    @apply my-5 rounded-lg border-l-4 px-4 pb-3 pt-2 not-italic;
+  }
+
+  .callout::before {
+    @apply block text-xs font-bold uppercase tracking-wider mb-2;
+    content: attr(data-callout);
+  }
+
+  /* insight / tip */
+  .callout-insight, .callout-tip {
+    @apply border-purple-400 bg-purple-50 dark:bg-purple-950/40 dark:border-purple-500;
+  }
+  .callout-insight::before, .callout-tip::before {
+    @apply text-purple-600 dark:text-purple-400;
+  }
+  .callout-insight::before { content: "💡 인사이트"; }
+  .callout-tip::before     { content: "💡 팁"; }
+
+  /* problem / warning */
+  .callout-problem, .callout-warning {
+    @apply border-red-400 bg-red-50 dark:bg-red-950/40 dark:border-red-500;
+  }
+  .callout-problem::before, .callout-warning::before {
+    @apply text-red-600 dark:text-red-400;
+  }
+  .callout-problem::before { content: "🔴 문제"; }
+  .callout-warning::before { content: "⚠️ 주의"; }
+
+  /* note */
+  .callout-note {
+    @apply border-blue-400 bg-blue-50 dark:bg-blue-950/40 dark:border-blue-500;
+  }
+  .callout-note::before {
+    @apply text-blue-600 dark:text-blue-400;
+    content: "📝 노트";
+  }
+
+  /* important */
+  .callout-important {
+    @apply border-amber-400 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-500;
+  }
+  .callout-important::before {
+    @apply text-amber-600 dark:text-amber-400;
+    content: "⭐ 중요";
+  }
+
+  /* success */
+  .callout-success {
+    @apply border-green-400 bg-green-50 dark:bg-green-950/40 dark:border-green-500;
+  }
+  .callout-success::before {
+    @apply text-green-600 dark:text-green-400;
+    content: "✅ 성공";
+  }
+
+  /* question */
+  .callout-question {
+    @apply border-cyan-400 bg-cyan-50 dark:bg-cyan-950/40 dark:border-cyan-500;
+  }
+  .callout-question::before {
+    @apply text-cyan-600 dark:text-cyan-400;
+    content: "❓ 질문";
+  }
+
+  /* prose 안에서 callout p 마진 조정 */
+  .prose .callout p {
+    @apply my-1;
   }
 }

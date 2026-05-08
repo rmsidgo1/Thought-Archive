@@ -16,17 +16,22 @@ const allNotes = await getCollection('notes');
 const related = allNotes
   .filter(note => note.slug !== currentSlug)
   .map(note => {
-    const sharedTags = note.data.tags.filter(t => tags.includes(t)).length;
-    // 이 노트가 링크하는 곳이거나, 역링크인 경우 점수 추가
-    const isLinked =
-      (links.includes(note.slug) ? 1 : 0) +
-      (backlinks.includes(note.slug) ? 1 : 0);
-    return { note, score: sharedTags + isLinked };
+    const sharedTags = note.data.tags.filter(t => tags.includes(t));
+    const linkedFrom = links.includes(note.slug);
+    const linksBack = backlinks.includes(note.slug);
+    const score = sharedTags.length + (linkedFrom ? 1 : 0) + (linksBack ? 1 : 0);
+
+    // 관계 이유 레이블
+    const reasons: string[] = [];
+    if (linkedFrom)          reasons.push('링크됨');
+    if (linksBack)           reasons.push('역링크');
+    if (sharedTags.length)   reasons.push(`태그 ${sharedTags.length}개 공유`);
+
+    return { note, score, reason: reasons[0] ?? '' };
   })
   .filter(({ score }) => score > 0)
   .sort((a, b) => b.score - a.score)
-  .slice(0, 5)
-  .map(({ note }) => note);
+  .slice(0, 5);
 ---
 
 {
@@ -35,15 +40,20 @@ const related = allNotes
       <h2 class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
         관련 노트
       </h2>
-      <ul class="space-y-1.5">
-        {related.map(note => (
-          <li>
+      <ul class="space-y-2">
+        {related.map(({ note, reason }) => (
+          <li class="flex items-center justify-between gap-3">
             <a
               href={url(`/notes/${note.slug}`)}
-              class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+              class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline truncate"
             >
               {note.data.title}
             </a>
+            {reason && (
+              <span class="shrink-0 text-xs text-gray-400 dark:text-gray-500">
+                {reason}
+              </span>
+            )}
           </li>
         ))}
       </ul>

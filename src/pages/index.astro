@@ -17,6 +17,26 @@ const sorted = [...notes].sort((a, b) => {
 });
 
 const allSlugs = notes.map(n => n.slug);
+const hasTypedNotes = notes.some(n => n.data.type);
+
+// 태그 클라우드 크기 계산
+const maxCount = Math.max(...[...tagMap.values()], 1);
+const minCount = Math.min(...[...tagMap.values()], 1);
+function tagSizeClass(count: number): string {
+  if (maxCount === minCount) return 'text-sm px-2.5 py-0.5';
+  const ratio = (count - minCount) / (maxCount - minCount);
+  if (ratio >= 0.75) return 'text-base px-3 py-1';
+  if (ratio >= 0.5)  return 'text-sm px-2.5 py-0.5';
+  if (ratio >= 0.25) return 'text-xs px-2.5 py-0.5';
+  return 'text-xs px-2 py-0.5';
+}
+
+const typeConfig = [
+  { value: 'problem-solving', label: '🔧 문제해결', cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-transparent' },
+  { value: 'insight',         label: '💡 인사이트', cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-transparent' },
+  { value: 'learning',        label: '📚 학습',     cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-transparent' },
+  { value: 'reference',       label: '📎 참고',     cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-transparent' },
+];
 ---
 
 <BaseLayout
@@ -49,17 +69,53 @@ const allSlugs = notes.map(n => n.slug);
     </div>
   </section>
 
-  <!-- Tags -->
+  <!-- Type Filter (타입이 있는 노트가 하나 이상일 때만 표시) -->
+  {hasTypedNotes && (
+    <section class="mb-8">
+      <h2 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        유형
+      </h2>
+      <div class="flex flex-wrap gap-2" id="type-filter">
+        <button
+          data-type-filter="all"
+          class="type-btn rounded-full border border-gray-300 dark:border-gray-700 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-2 ring-indigo-500 ring-offset-1 dark:ring-offset-gray-900"
+        >
+          전체
+        </button>
+        {typeConfig.map(t => (
+          <button
+            data-type-filter={t.value}
+            class={`type-btn rounded-full border px-3 py-1 text-xs font-medium ${t.cls}`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Tags (클라우드 형식) -->
   {
     tagMap.size > 0 && (
       <section class="mb-10">
         <h2 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
           태그
         </h2>
-        <div class="flex flex-wrap gap-2">
-          {[...tagMap.entries()].map(([tag, count]) => (
-            <TagBadge tag={tag} count={count} />
-          ))}
+        <div class="flex flex-wrap items-baseline gap-2">
+          {[...tagMap.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .map(([tag, count]) => (
+              <a
+                href={url(`/tags/${tag}`)}
+                class={`inline-flex items-center rounded-full font-medium
+                        bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300
+                        hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors
+                        ${tagSizeClass(count)}`}
+                title={`${count}개의 노트`}
+              >
+                #{tag}
+              </a>
+            ))}
         </div>
       </section>
     )
@@ -67,26 +123,31 @@ const allSlugs = notes.map(n => n.slug);
 
   <!-- Notes -->
   <section>
-    <h2 class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+    <h2 id="notes-heading" class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
       노트 ({notes.length}개)
     </h2>
-    <div class="space-y-2.5">
+    <div class="space-y-2.5" id="notes-list">
       {
         sorted.map(note => (
           <NoteCard
             slug={note.slug}
             title={note.data.title}
             tags={note.data.tags}
+            type={note.data.type}
             created={note.data.created}
             readingTime={getReadingTime(note.body)}
           />
         ))
       }
     </div>
+    <p id="no-results" class="hidden text-sm text-gray-400 dark:text-gray-500 py-4">
+      해당 유형의 노트가 없습니다.
+    </p>
   </section>
 </BaseLayout>
 
 <script>
+  // 랜덤 노트
   const btn = document.getElementById('random-btn');
   if (btn) {
     const slugs: string[] = JSON.parse(btn.dataset.slugs ?? '[]');
@@ -97,4 +158,41 @@ const allSlugs = notes.map(n => n.slug);
       window.location.href = `${base}${slug}`;
     });
   }
+
+  // 타입 필터
+  const filterBtns = document.querySelectorAll<HTMLButtonElement>('.type-btn');
+  const notesList = document.getElementById('notes-list');
+  const noResults = document.getElementById('no-results');
+  const notesHeading = document.getElementById('notes-heading');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.typeFilter ?? 'all';
+
+      // 버튼 활성화 표시
+      filterBtns.forEach(b => b.classList.remove('ring-2', 'ring-indigo-500', 'ring-offset-1', 'dark:ring-offset-gray-900'));
+      btn.classList.add('ring-2', 'ring-indigo-500', 'ring-offset-1', 'dark:ring-offset-gray-900');
+
+      // 카드 필터링
+      const cards = notesList?.querySelectorAll<HTMLElement>('article');
+      let visibleCount = 0;
+      cards?.forEach(card => {
+        const cardType = card.dataset.type ?? '';
+        const show = filter === 'all' || cardType === filter;
+        card.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+      });
+
+      // 결과 없음 처리
+      if (noResults) noResults.classList.toggle('hidden', visibleCount > 0);
+
+      // 헤딩 카운트 업데이트
+      const total = notesList?.querySelectorAll<HTMLElement>('article').length ?? 0;
+      if (notesHeading) {
+        notesHeading.textContent = filter === 'all'
+          ? `노트 (${total}개)`
+          : `노트 (${visibleCount}개)`;
+      }
+    });
+  });
 </script>

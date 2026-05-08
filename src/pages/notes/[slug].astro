@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import TagBadge from '../../components/TagBadge.astro';
 import BacklinkList from '../../components/BacklinkList.astro';
 import RelatedNotes from '../../components/RelatedNotes.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import { getCollection } from 'astro:content';
 import { getBacklinks, parseLinks } from '../../utils/backlinks';
 import { getReadingTime } from '../../utils/reading-time';
@@ -17,42 +18,74 @@ export async function getStaticPaths() {
 }
 
 const { note } = Astro.props;
-const { Content } = await note.render();
+const { Content, headings } = await note.render();
 
 const backlinks = await getBacklinks(note.slug);
 const links = parseLinks(note.body);
 const readingTime = getReadingTime(note.body);
+
+const typeConfig: Record<string, { label: string; cls: string }> = {
+  'problem-solving': { label: '🔧 문제해결', cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+  'insight':         { label: '💡 인사이트', cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+  'learning':        { label: '📚 학습',     cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  'reference':       { label: '📎 참고',     cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+};
+const typeInfo = note.data.type ? typeConfig[note.data.type] : null;
+
+const hasToc = headings.filter(h => h.depth === 2 || h.depth === 3).length >= 2;
 ---
 
 <BaseLayout title={note.data.title} description={`${note.data.title} — Thought Archive`}>
-  <article data-pagefind-body>
-    <!-- 헤더 -->
-    <header class="mb-8">
+  <!-- 헤더 (항상 풀 너비) -->
+  <header class="mb-8">
+    <div class="mb-3 flex flex-wrap items-center gap-2">
+      {typeInfo && (
+        <span class={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${typeInfo.cls}`}>
+          {typeInfo.label}
+        </span>
+      )}
+      {note.data.tags.map(tag => <TagBadge tag={tag} />)}
+    </div>
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+      {note.data.title}
+    </h1>
+    <div class="flex flex-wrap items-center gap-3 text-sm text-gray-400 dark:text-gray-500">
+      {note.data.created && <time datetime={note.data.created}>{note.data.created}</time>}
       {
-        note.data.tags.length > 0 && (
-          <div class="mb-3 flex flex-wrap gap-1.5">
-            {note.data.tags.map(tag => <TagBadge tag={tag} />)}
-          </div>
+        note.data.updated && note.data.updated !== note.data.created && (
+          <span>수정: {note.data.updated}</span>
         )
       }
-      <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-        {note.data.title}
-      </h1>
-      <div class="flex flex-wrap items-center gap-3 text-sm text-gray-400 dark:text-gray-500">
-        {note.data.created && <time datetime={note.data.created}>{note.data.created}</time>}
-        {
-          note.data.updated && note.data.updated !== note.data.created && (
-            <span>수정: {note.data.updated}</span>
-          )
-        }
-        <span>{readingTime}분 읽기</span>
-      </div>
-    </header>
-
-    <!-- 본문 -->
-    <div class="prose prose-gray dark:prose-invert max-w-none prose-a:no-underline">
-      <Content />
+      <span>{readingTime}분 읽기</span>
     </div>
+  </header>
+
+  <!-- 본문 영역: TOC 있으면 2열, 없으면 1열 -->
+  <article data-pagefind-body>
+    {hasToc ? (
+      <div class="lg:grid lg:grid-cols-[1fr_200px] lg:gap-12">
+        <!-- 본문 -->
+        <div>
+          <!-- 모바일 인라인 TOC -->
+          <div class="lg:hidden mb-8 rounded-lg border border-gray-200 dark:border-gray-800 p-4">
+            <TableOfContents headings={headings} />
+          </div>
+          <div class="prose prose-gray dark:prose-invert max-w-none prose-a:no-underline">
+            <Content />
+          </div>
+        </div>
+        <!-- 데스크탑 사이드바 TOC -->
+        <aside class="hidden lg:block">
+          <div class="sticky top-24">
+            <TableOfContents headings={headings} />
+          </div>
+        </aside>
+      </div>
+    ) : (
+      <div class="prose prose-gray dark:prose-invert max-w-none prose-a:no-underline">
+        <Content />
+      </div>
+    )}
   </article>
 
   <!-- 관련 노트 -->

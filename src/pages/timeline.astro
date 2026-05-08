@@ -1,0 +1,132 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { url } from '../utils/url';
+
+const notes = await getCollection('notes');
+
+const typeConfig: Record<string, { label: string; cls: string }> = {
+  'problem-solving': { label: '🔧', cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+  'insight':         { label: '💡', cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+  'learning':        { label: '📚', cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  'reference':       { label: '📎', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+};
+
+// created 있는 노트를 최신순 정렬
+const dated = [...notes]
+  .filter(n => n.data.created)
+  .sort((a, b) => (b.data.created ?? '').localeCompare(a.data.created ?? ''));
+
+const undated = notes.filter(n => !n.data.created);
+
+// 연도-월 그룹핑
+const groups = new Map<string, typeof notes>();
+for (const note of dated) {
+  const ym = (note.data.created ?? '').slice(0, 7); // "YYYY-MM"
+  if (!groups.has(ym)) groups.set(ym, []);
+  groups.get(ym)!.push(note);
+}
+
+function formatYearMonth(ym: string) {
+  const [y, m] = ym.split('-');
+  return `${y}년 ${parseInt(m, 10)}월`;
+}
+---
+
+<BaseLayout title="타임라인" description="날짜 순 노트 아카이브">
+  <div class="mb-8 flex items-center justify-between">
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">타임라인</h1>
+    <span class="text-sm text-gray-400 dark:text-gray-500">{dated.length}개의 노트</span>
+  </div>
+
+  {groups.size === 0 && undated.length === 0 && (
+    <p class="text-sm text-gray-500 dark:text-gray-400">아직 노트가 없습니다.</p>
+  )}
+
+  <!-- 날짜별 그룹 -->
+  <div class="relative">
+    <!-- 타임라인 수직선 -->
+    <div class="absolute left-[7px] top-2 bottom-0 w-px bg-gray-200 dark:bg-gray-800" aria-hidden="true" />
+
+    <div class="space-y-10">
+      {[...groups.entries()].map(([ym, groupNotes]) => (
+        <section>
+          <!-- 월 헤더 -->
+          <div class="flex items-center gap-3 mb-4">
+            <div class="relative z-10 h-[15px] w-[15px] rounded-full border-2 border-indigo-500 bg-gray-50 dark:bg-gray-900 shrink-0" />
+            <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400">
+              {formatYearMonth(ym)}
+            </h2>
+          </div>
+
+          <!-- 해당 월 노트 목록 -->
+          <ul class="ml-9 space-y-2.5">
+            {groupNotes.map(note => {
+              const t = note.data.type ? typeConfig[note.data.type] : null;
+              return (
+                <li>
+                  <a
+                    href={url(`/notes/${note.slug}`)}
+                    class="group flex items-start gap-2.5 rounded-lg border border-gray-200 dark:border-gray-800
+                           bg-white dark:bg-gray-800/50 px-4 py-3
+                           hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors"
+                  >
+                    {t && (
+                      <span class={`mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${t.cls}`}>
+                        {t.label}
+                      </span>
+                    )}
+                    <span class="flex-1 min-w-0">
+                      <span class="block text-sm font-medium text-gray-900 dark:text-gray-100
+                                   group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {note.data.title}
+                      </span>
+                      {note.data.tags.length > 0 && (
+                        <span class="mt-1 flex flex-wrap gap-1">
+                          {note.data.tags.map(tag => (
+                            <span class="text-xs text-gray-400 dark:text-gray-500">#{tag}</span>
+                          ))}
+                        </span>
+                      )}
+                    </span>
+                    <time
+                      datetime={note.data.created}
+                      class="shrink-0 text-xs text-gray-400 dark:text-gray-500 pt-0.5"
+                    >
+                      {note.data.created?.slice(5)} {/* MM-DD */}
+                    </time>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+
+      {undated.length > 0 && (
+        <section>
+          <div class="flex items-center gap-3 mb-4">
+            <div class="relative z-10 h-[15px] w-[15px] rounded-full border-2 border-gray-400 bg-gray-50 dark:bg-gray-900 shrink-0" />
+            <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400">날짜 없음</h2>
+          </div>
+          <ul class="ml-9 space-y-2.5">
+            {undated.map(note => (
+              <li>
+                <a
+                  href={url(`/notes/${note.slug}`)}
+                  class="group block rounded-lg border border-gray-200 dark:border-gray-800
+                         bg-white dark:bg-gray-800/50 px-4 py-3 text-sm font-medium
+                         text-gray-900 dark:text-gray-100
+                         hover:border-indigo-300 dark:hover:border-indigo-700
+                         group-hover:text-indigo-600 transition-colors"
+                >
+                  {note.data.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  </div>
+</BaseLayout>

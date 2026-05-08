@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import { remarkWikiLinks } from './src/utils/remark-wiki-links.mjs';
+import { remarkCallouts } from './src/utils/remark-callouts.mjs';
 
 const BASE = '/Thought-Archive';
 
@@ -9,9 +10,12 @@ export default defineConfig({
   base: BASE,
   site: 'https://rmsidgo1.github.io',
   markdown: {
-    remarkPlugins: [[remarkWikiLinks, { base: BASE }]],
+    remarkPlugins: [[remarkWikiLinks, { base: BASE }], remarkCallouts],
     shikiConfig: {
-      theme: 'github-dark',
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
       wrap: true,
     },
   },
