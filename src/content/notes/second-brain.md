@@ -34,3 +34,5 @@ updated: 2026-05-07
 [[zettelkasten]] 방법론과 조합하면 더 강력한 지식 관리 시스템이 된다.
 
 [[llm-agents]]를 활용하면 정보 수집(Capture) 단계를 자동화할 수 있다.
+
+[[llm-knowledge-automation]] — *llm-knowledge-automation 노트 작성 중에 추가된 연결입니다.*

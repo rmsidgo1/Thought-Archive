@@ -1,6 +1,6 @@
 # 노트 인덱스
 
-> 마지막 업데이트: 2026-05-08 / 총 7개
+> 마지막 업데이트: 2026-05-08 / 총 8개
 >
 > **LLM 노트 작성 요청 시 이 파일을 README.md와 함께 전달하세요.**
 > 기존 노트와 관련된 내용은 `[[slug]]` 문법으로 반드시 연결해야 합니다.
@@ -12,6 +12,7 @@
 | `astro-tips` | Astro 팁 | - | #astro #개발 |
 | `building-in-public` | 빌드 인 퍼블릭 | - | #사업 #인디해커 #마케팅 |
 | `llm-agents` | LLM 에이전트 | - | #ai #agents |
+| `llm-knowledge-automation` | LLM으로 지식 관리 자동화하기 | insight | #ai #pkm #자동화 |
 | `prompt-engineering` | 프롬프트 엔지니어링 | learning | #ai #llm #생산성 |
 | `second-brain` | 세컨드 브레인 | - | #pkm #생산성 #노트앱 |
 | `welcome` | 환영합니다 | - | #시작하기 |
@@ -22,6 +23,7 @@
 - **astro-tips**: Astro 팁 — 이 아카이브([[welcome]])는 Astro 기반으로 구축되어 있다.
 - **building-in-public**: 빌드 인 퍼블릭 — 빌드 인 퍼블릭(Building in Public)은 제품 개발 과정을 공개적으로 공유하는 전략이다. 완성된 제품이 아니라 과정 자체를 콘텐츠로
 - **llm-agents**: LLM 에이전트 — LLM(대형 언어 모델) 기반 에이전트는 도구(tools)와 메모리를 활용하여 복잡한 작업을 자율적으로 수행한다.
+- **llm-knowledge-automation**: LLM으로 지식 관리 자동화하기 — LLM에게 대화 기록을 보여주는 것만으로 구조화된 지식 노트를 자동 생성할 수 있다.
 - **prompt-engineering**: 프롬프트 엔지니어링 — LLM에게 원하는 결과를 얻기 위해 입력(프롬프트)을 설계하는 기술.
 - **second-brain**: 세컨드 브레인 — 티아고 포르테(Tiago Forte)가 정립한 개인 지식 관리(PKM) 방법론. 디지털 도구를 두 번째 뇌처럼 활용해 정보를 체계적으로 저장하고
 - **welcome**: 환영합니다 — 이곳은 나의 **생각의 지도**입니다.

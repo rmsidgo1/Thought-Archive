@@ -28,3 +28,5 @@ Reason → Act → Observe 사이클을 반복하여 목표를 달성한다.
 ## 왜 중요한가
 
 단순한 Q&A를 넘어서, LLM이 실제 도구를 사용해 목표를 달성하는 패러다임 전환이다.
+
+[[llm-knowledge-automation]] — *llm-knowledge-automation 노트 작성 중에 추가된 연결입니다.*
