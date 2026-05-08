@@ -7,6 +7,36 @@ Astro + TailwindCSS + Pagefind 기반. GitHub Pages 배포.
 
 ---
 
+## GitHub에서 노트 추가하기
+
+로컬 환경 없이 GitHub 웹에서 바로 노트를 추가할 수 있습니다.
+
+### 1단계 — 기존 노트 목록 확인
+
+[NOTE_INDEX.md](https://github.com/rmsidgo1/Thought-Archive/blob/main/NOTE_INDEX.md)에서 기존 노트 목록과 사용 중인 태그를 확인합니다.
+
+### 2단계 — LLM으로 노트 작성
+
+아래 [LLM 시스템 프롬프트](#llm-시스템-프롬프트-복사해서-llm에-전달) 전체를 LLM에 복사해 전달합니다.  
+기록할 내용(대화, 경험, 학습 메모 등)과 NOTE_INDEX.md 내용을 함께 제공하면 노트를 바로 생성해줍니다.
+
+### 3단계 — GitHub에 파일 올리기
+
+**[+ 새 노트 만들기](https://github.com/rmsidgo1/Thought-Archive/new/main/src/content/notes)**
+
+위 링크를 클릭해 LLM이 생성한 노트 내용을 붙여넣고 커밋합니다.  
+또는 [`src/content/notes/`](https://github.com/rmsidgo1/Thought-Archive/tree/main/src/content/notes) 폴더에서 **Add file → Create new file**을 클릭해도 됩니다.
+
+### 4단계 — 역방향 연결 추가 (선택)
+
+LLM이 `LINK_REQUESTS.json`도 함께 생성했다면:
+
+**[+ LINK_REQUESTS.json 추가하기](https://github.com/rmsidgo1/Thought-Archive/new/main?filename=LINK_REQUESTS.json)**
+
+커밋하면 GitHub Actions가 자동으로 기존 노트에 역방향 연결을 추가합니다.
+
+---
+
 ## LLM으로 노트 자동 생성하기
 
 대화 기록이나 경험을 LLM에게 공유하고, 일관된 형식의 노트를 자동으로 생성할 수 있습니다.
